@@ -603,9 +603,9 @@
 
             function copy3(arr) {
                 if (Array.isArray(arr)) {
-                    return arr.map(t => copy2(t))
+                    return arr.map(t => copy3(t))
                 } else if (Object.prototype.toString.call(arr) === '[object Object]') { //arr instanceof Object
-                    return Object.assign({}, t)
+                    return Object.assign({}, arr)
                 } else {
                     return arr
                 }
