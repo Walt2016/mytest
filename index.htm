@@ -11,7 +11,7 @@
             margin: 0px;
         }
 
-        #myform {
+        #wrapper {
             width: 98%;
             display: flex;
             flex-direction: column;
@@ -19,7 +19,7 @@
             align-items: center;
         }
 
-        #myform .form {
+        #wrapper .form {
             font-size: 10px;
             margin-bottom: 40px;
             /* border: 1px solid #ccc; */
@@ -38,7 +38,7 @@
             background-image: linear-gradient(#fff, #e5eecc 100px);
         }
 
-        #myform .form .form_header {
+        #wrapper .form .form_header {
             font-size: 18px;
             line-height: 40px;
             height: 40px;
@@ -47,17 +47,17 @@
             border-bottom: 1px solid #d4d4d4;
         }
 
-        #myform .form .form_body {
+        #wrapper .form .form_body {
             padding: 10px;
         }
 
-        #myform .form .form_footer {
+        #wrapper .form .form_footer {
             width: 100%;
             text-align: center;
             padding: 4px;
         }
 
-        #myform .form .form_footer button {
+        #wrapper .form .form_footer button {
             padding: 0px;
             width: 100px;
             height: 40px;
@@ -86,295 +86,43 @@
             width: 300px;
             height: 50px
         }
+
+        .form .form_item .form_item_btn {
+            /* border: 1px solid #ccc;
+            padding: 0 2px;
+            height: 28px;
+            line-height: 28px; */
+
+            width: 100px;
+            text-align: center;
+        }
     </style>
 </head>
 
 <body>
-    <div id="myform"></div>
+    <div id="wrapper"></div>
+    <script src="./myform.js"></script>
     <script>
-        function _random() {
-            return "_" + Math.random().toString(16).slice(2)
-        }
-
-        function _form(options) {
-            let {
-                el,
-                fields,
-                onclick,
-                title
-            } = options
-            el = el ? document.querySelector(el) : document.body
-            let id = _random()
-            let form = _div({
-                class: 'form',
-                id
-            })
-            let formBody = _div({
-                class: 'form_body'
-            })
-            fields.forEach(t => {
-                formBody.appendChild(_formItem(t))
-            })
-            let formHeader = _div({
-                class: "form_header",
-                text: title
-            })
-
-            let formFooter = _div({
-                class: "form_footer"
-            })
-            formFooter.appendChild(_btn({
-                onclick,
-                text: "执行",
-                form: "#" + id
-            }))
-            form.appendChild(formHeader)
-            form.appendChild(formBody)
-            form.appendChild(formFooter)
-            el.appendChild(form)
-        }
-
-        function _btn({
-            onclick,
-            text,
-            form
-        }) {
-            let btn = document.createElement("button")
-            btn.setAttribute("type", "button")
-            btn.innerText = text
-            btn.onclick = (e) => {
-                let inputs = document.querySelectorAll(form + " [name='input']")
-                let output = document.querySelector(form + " [name='output']")
-                let fn = document.querySelector(form + " [name='function']") //textarea
-                let values = []
-                inputs.forEach(t => {
-                    values.push(JSON.parse(t.value))
-                })
-                let e_str = "(" + fn.value + ")(...values)"
-                // let result = JSON.stringify(onclick(...values))
-                let result = ""
-                try {
-                    result = JSON.stringify(eval(e_str))
-                } catch (e) {
-                    result = e
-                }
-                output.value = result
-            }
-            return btn
-        }
-
-        function _div(options) {
-            let div = document.createElement("div")
-            for (let key in options) {
-                if (key == "text") {
-                    div.innerText = options[key]
-                } else {
-                    div.setAttribute(key, options[key])
-                }
-            }
-            return div
-        }
-
-        function _input(options) {
-            let {
-                id,
-                value
-            } = options
-            let input = document.createElement("input")
-            input.setAttribute("type", "text")
-            for (let key in options) {
-                if (key == "id") {
-                    input.setAttribute(key, id)
-                } else if (key == "value") {
-                    if (value) {
-                        input.value = JSON.stringify(value)
-                    }
-                } else {
-                    input.setAttribute(key, options[key])
-                }
-            }
-            return input
-        }
-
-        function _textarea(options) {
-            let {
-                id,
-                value
-            } = options
-            let textarea = document.createElement("textarea")
-            for (let key in options) {
-                if (key == "id") {
-                    textarea.setAttribute(key, id)
-                } else if (key == "text") {
-                    textarea.innerHTML = options[key]
-                } else if (key == "value") {
-                    if (value) {
-                        textarea.value = JSON.stringify(value)
-                    }
-                } else {
-                    textarea.setAttribute(key, options[key])
-                }
-            }
-            return textarea
-        }
-
-        function _trueorfalse(options) {
-            let {
-                value
-            } = options
-            let select = document.createElement("select");
-            for (let key in options) {
-                select.setAttribute(key, options[key])
-            }
-            [{
-                label: "true",
-                value: true
-            }, {
-                label: "false",
-                value: false
-            }].forEach(t => {
-                let opt = new Option(t.label, t.value);
-                select.options.add(opt);
-            })
-            return select
-
-        }
-
-        function _formItem(field) {
-            let {
-                label,
-                key,
-                value,
-                type
-            } = field
-            let formItem = _div({
-                class: "form_item"
-            })
-            let labelDiv = _div({
-                class: "form_item_label",
-                text: label
-            })
-
-            formItem.appendChild(labelDiv)
-
-            switch (type) {
-                case "textarea":
-                    let textarea = _textarea(Object.assign({
-                        class: 'form_item_textarea',
-                        value,
-                        name: key
-                    }, field))
-                    formItem.appendChild(textarea)
-                    break;
-                case "trueorfalse":
-                    let div = _trueorfalse(Object.assign({
-                        class: 'form_item_select',
-                        name: key
-                    }, field))
-                    formItem.appendChild(div)
-                    break;
-                default:
-                    let input = _input({
-                        class: 'form_item_input',
-                        value,
-                        name: key
-                    })
-                    formItem.appendChild(input)
-            }
-            return formItem
-
-        }
-
-        function myform(title, onclick, ...inputs) {
-            let fields = inputs.map(t => {
-                console.log(typeof t)
-                let type = "textarea"
-                if (typeof t == "boolean") {
-                    type = "trueorfalse"
-                }
-
-                return {
-                    label: 'input',
-                    key: 'input',
-                    type,
-                    value: t
-                }
-            })
-
-            fields.push({
-                label: 'function',
-                key: 'function',
-                type: 'textarea',
-                text: onclick
-            })
-            fields.push({
-                label: 'output',
-                key: 'output',
-                type: 'textarea'
-            })
-            _form({
-                el: "#myform",
-                fields,
-                onclick,
-                title
-            })
-        }
-
-
-
         {
-            console.log('%c1.数组去重并排序', 'font-size:18px;color:#4caf50;')
-            // // 1、 数组去重并排序
-            // //输入
-            let input = ['c', 'a', 'b', 'a']
-            //输出
-            let output = ['a', 'b', 'c']
-
-            function distinct(list) {
-                let res = [],
-                    tmp = {};
-                list.forEach(t => {
-                    if (!tmp[t]) {
-                        res.push(t)
-                        tmp[t] = true
-                    }
-                })
-                return res.sort((a, b) => {
-                    if (a > b) {
-                        return 1
-                    } else if (a < b) {
-                        return -1
-                    } else {
-                        return 0
-                    }
-                })
-            }
-
-            console.log(distinct(input))
-
-            myform("1、数组去重并排序", distinct, input)
-
-
-        } {
             console.log('%c2、对象转换', 'font-size:18px;background-color:#4caf50;')
             //  2、对象转换
             // 输入
             let input = "Prod_id,prod_Name,prod_dEsc"
             // 输出
             //key 是小驼峰  label 是首字母大写
-            let ouput = [{
-                "key": "prodId",
-                "label": "Prod Id",
-                "index": 1
-            }, {
-                "key": "prodName",
-                "label": "Prod Name",
-                "index": 2
-            }, {
-                "key": "prodDesc",
-                "label": "Prod Desc",
-                "index": 3
-            }]
+            // let ouput = [{
+            //     "key": "prodId",
+            //     "label": "Prod Id",
+            //     "index": 1
+            // }, {
+            //     "key": "prodName",
+            //     "label": "Prod Name",
+            //     "index": 2
+            // }, {
+            //     "key": "prodDesc",
+            //     "label": "Prod Desc",
+            //     "index": 3
+            // }]
 
 
             function translate(str) {
@@ -397,322 +145,49 @@
             }
 
             console.log(translate(input))
+            var toForm = (e) => {
+                console.log(e)
+                let output = document.querySelector("#" + mf.id + " [name='output']")
+                output = JSON.parse(output.value)
 
-            myform("2、对象转换", translate, input)
-        }
-
-        {
-            console.log('%c3 数组按长度排序', 'font-size:18px;color:#4caf50;')
-            // 3 数组按长度排序
-            //输入
-            let input = ["aaa", "d", "dddd"]
-            //输出
-            let output = ["dddd", "aaa", "d"]
-
-            //按长度排序
-            function sortByLen(arr) {
-                return arr.map(i => ({
-                        raw: i,
-                        len: i.length
-                    }))
-                    .sort((p, n) => n.len - p.len)
-                    .map(i => i.raw)
-            }
-            console.log(sortByLen(input))
-
-            myform("3、数组按长度排序", sortByLen, input)
-
-
-            //不完整方法
-            function test(arr) {
-                return arr.sort((a, b) => {
-                    return b.length - a.length
-                })
-            }
-            console.log("不完整方法")
-            console.log(test(input))
-
-
-        }
-
-        {
-            console.log('%c4、 字符串模板处理', 'font-size:18px;color:#4caf50;')
-            // 4、 字符串模板处理
-            let input1 = "你好$name，欢迎到$home。这是你第$count次来$home。<br>$home每天不一样哦!"
-            input2 = {
-                name: 'jack',
-                home: "武汉",
-                count: 3
-            }
-            let output = "你好jack，欢迎到武汉。这是你第3次来武汉。<br>武汉每天不一样哦!"
-
-
-            function tpler(tmpl, data) {
-                for (var key in data) {
-                    tmpl = tmpl.replace(new RegExp("\\$" + key, 'g'), data[key])
-                }
-                return tmpl
-            }
-
-            console.log(tpler(input1, input2))
-
-            myform("4、字符串模板处理", tpler, input1, input2)
-        }
-
-        {
-            console.log('%c5、二维数组转换成树结构', 'font-size:18px;color:#4caf50;')
-            //5、二维数组转换成树结构
-            let input = [
-                ["新闻", "体育", "网球", "国外"],
-                ["新闻", "体育", "网球", "国内"],
-                ["产品", "互联网", "金融"],
-                ["新闻", "房产", "深圳"],
-                ["新闻", "房产", "上海"],
-                ["新闻", "体育", "羽毛球"],
-                ["产品", "互联网", "保险"]
-            ]
-
-            let ouput = [{
-                "name": "新闻",
-                "children": [{
-                    "name": "体育",
-                    "children": [{
-                        "name": "网球",
-                        "children": [{
-                            "name": "国外"
-                        }, {
-                            "name": "国内"
-                        }]
-                    }, {
-                        "name": "羽毛球"
-                    }]
-                }, {
-                    "name": "房产",
-                    "children": [{
-                        "name": "深圳"
-                    }, {
-                        "name": "上海"
-                    }]
-                }]
-            }, {
-                "name": "产品",
-                "children": [{
-                    "name": "互联网",
-                    "children": [{
-                        "name": "金融"
-                    }, {
-                        "name": "保险"
-                    }]
-                }]
-            }]
-
-            function tree(aa) {
-                let arr = []
-                let item = {}
-                aa.forEach(t => {
-                    let a = t[0]
-                    if (!a) return []
-                    let children = aa.filter(t => t[0] == a).map(t => {
-                        return t.slice(1)
-                    })
-                    children = tree(children)
-                    item[a] = children.length > 0 ? {
-                        name: a,
-                        children
-                    } : {
-                        name: a
-                    }
-
-                })
-                for (let key in item) {
-                    arr.push(item[key])
-                }
-                return arr
-            }
-
-            console.log(tree(input))
-
-            myform("5、二维数组转换成树结构", tree, input)
-        }
-
-        {
-
-            console.log('%c6 判断对象是否包含属性', 'font-size:18px;color:#4caf50;')
-            //6 判断对象是否包含属性
-            //输入条件1
-            let obj = {
-                    Abc: "ddd"
-                },
-                key = "abc",
-                ignoreCase = true
-            // 输出1 
-            let ouput1 = true
-
-            //输入条件2
-            ignoreCase = false
-            // 输出2 
-            let ouput2 = false
-
-
-
-            //判断对象是否有属性 ，忽略大小写
-            function hasProp(obj, key, ignoreCase) {
-                if (ignoreCase) {
-                    key = key.toLowerCase()
-                    for (let k in obj) {
-                        if (k.toLowerCase() == key) {
-                            return true
+                // _wrapper("2、对象转换", ()=>{}, output)
+                _form({
+                    el: "#wrapper",
+                    fields: output,
+                    title: "Search",
+                    btn: {
+                        text: "Search",
+                        name:'submit',
+                        click: (e) => {
+                            console.log(e)
                         }
+
                     }
-                } else {
-                    return Object.hasOwnProperty.call(obj, key)
-                }
+                })
             }
 
-            console.log(hasProp(obj, key, ignoreCase))
+            // console.log(mf)
+            let fn = (input) => {
+                console.log(input)
+                setTimeout(toForm, 100)
+                return translate(input);
+                console.log(mf);
 
-            myform("6、判断对象是否包含属性", hasProp, obj, key, ignoreCase)
 
-
-        } {
-
-            console.log('%c7 对象数组拷贝', 'font-size:18px;color:#4caf50;')
-            // 7 对象数组拷贝
-            let input = [{
-                "key": "prodId",
-                "label": "Prod Id",
-                "index": 1
-            }, {
-                "key": "prodName",
-                "label": "Prod Name",
-                "index": 2
-            }, {
-                "key": "prodDesc",
-                "label": "Prod Desc",
-                "index": 3
-            }]
-
-            function copy(obj) {
-                return JSON.parse(JSON.stringify(obj))
             }
-
-            //只适合数组对象
-            function copy2(arr) {
-                return arr.map(t => Object.assign({}, t))
-            }
-
-            function copy3(arr) {
-                if (Array.isArray(arr)) {
-                    return arr.map(t => copy3(t))
-                } else if (Object.prototype.toString.call(arr) === '[object Object]') { //arr instanceof Object
-                    return Object.assign({}, arr)
-                } else {
-                    return arr
-                }
-            }
-
-            let output = copy(input)
-            let output2 = copy2(input)
-
-            input.forEach(t => {
-                if (t.index == 2) {
-                    t.hide = true
-                }
+            // var mf = _wrapper("2、对象转换", fn, input)
+            var mf = _wrapper({
+                title: "2、对象转换",
+                // onclick: translate,
+                events: [translate, toForm],
+                outputType: "form",
+                // outputClick: toForm,
+                inputs: [input, [1, 2]]
             })
 
-            console.log(input)
-            console.log(output)
-            console.log(output2)
-
-            myform("7、 对象数组拷贝（1）", copy, input)
-            myform("7、 对象数组拷贝（2）", copy2, input)
-            myform("7、 对象数组拷贝（3）", copy3, input)
-
-            // 请用两种以上方法实现copy函数。让 output和input 保存各自独立，当input发生变化，output不变
-
-        }
-
-        {
-            console.log('%c8 坐标计算  圆心o  半径r  圆n等分坐标', 'font-size:18px;color:#4caf50;')
-            // 8 坐标计算  圆心o  半径r  圆n等分坐标。
-            let input = {
-                o: [100, 100],
-                r: 100,
-                n: 5
-            }
-
-            let ouput = [
-                [200, 100],
-                [130.90169943749476, 195.10565162951536],
-                [19.098300562505273, 158.77852522924732],
-                [19.09830056250526, 41.2214747707527],
-                [130.90169943749473, 4.894348370484636]
-            ]
 
 
 
-
-            function polygon(options) {
-                let points = [];
-                let {
-                    o,
-                    r,
-                    n,
-                    sAngle = 0
-                } = options
-
-                for (let i = 0; i < n; i++) {
-                    let a = i * 2 * Math.PI / n + (sAngle / 2 * Math.PI) //等角
-                    points[i] = [o[0] + r * Math.cos(a), o[1] + r * Math.sin(a)]
-                }
-                return points
-            }
-
-
-            console.log(polygon(input))
-
-            myform("8、坐标计算", polygon, input)
-        } {
-
-            console.log('%c9  根据单词表切分单词 ', 'font-size:18px;color:#4caf50;')
-            // 9  根据单词表切分单词 
-            //输入
-            let words = ['my', 'home', 'welcome', 'this']
-            let input = "hellothisismyhomewelcometomyhome"
-            //输出
-            let oupput = ["hello", "this", "is", "my", "home", "welcome", "to", "my", "home"]
-            let wordsReg = RegExp(words.join("|"), 'i')
-
-
-            //切分原则，比对最长的单词，剩余的可递归
-            function splitWords(t, words) {
-                if (!t) return []
-                let wordsReg = RegExp(words.join("|"), 'i')
-                var m = t.match(wordsReg)
-                if (m) {
-                    var arr = []
-                    var index = m.index
-                    var word = m[0]
-                    var last = ""
-                    if (word == t) {
-                        return arr.concat([word])
-                    } else {
-                        if (index == 0) {
-                            arr.push(word);
-                            last = t.slice(word.length)
-                        } else {
-                            arr.push(t.slice(0, index))
-                            last = t.slice(index)
-                        }
-                        return arr.concat(splitWords(last, words))
-                    }
-                }
-                return [t]
-            }
-
-            console.log(splitWords(input, words))
-
-            myform("9、根据单词表切分单词", splitWords, input, words)
 
         }
     </script>
