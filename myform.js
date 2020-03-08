@@ -38,29 +38,29 @@ function _form(options) {
         btns = [],
         title
     } = options
-    el = el ? document.querySelector(el) : document.body
-    let id = _random()
-    let form = _div({
-        class: 'form',
-        id
-    })
-    let formBody = _div({
-        class: 'form_body'
-    })
-    fields.forEach(t => {
-        formBody.appendChild(_formItem(t, id))
-    })
-    let formHeader = _div({
-        class: "form_header",
-        text: title
-    })
 
-    let formFooter = _div({
-        class: "form_footer"
-    });
-    if (events.length == 0 && click) {
-        events = [click]
-    }
+    // let id = _random()
+    // let form = _div({
+    //     class: 'form',
+    //     id
+    // })
+    // let formBody = _div({
+    //     class: 'form_body'
+    // })
+    // fields.forEach(t => {
+    //     formBody.appendChild(_formItem(t, id))
+    // })
+    // let formHeader = _div({
+    //     class: "form_header",
+    //     text: title
+    // })
+
+    // let formFooter = _div({
+    //     class: "form_footer"
+    // });
+    // if (events.length == 0 && click) {
+    //     events = [click]
+    // }
 
     // events.forEach((t, i) => {
 
@@ -75,22 +75,111 @@ function _form(options) {
 
     // })
 
-    if (btn) {
-        formFooter.appendChild(_btn(
+    // if (btn) {
+    //     formFooter.appendChild(_btn(
+    //         Object.assign(btn, {
+    //             form: id,
+    //             fields
+    //         })
+
+    //     ))
+    // }
+
+    // form.appendChild(formHeader)
+    // form.appendChild(formBody)
+    // form.appendChild(formFooter)
+
+
+    let form = _panel({
+        title,
+        body: fields.map(t => {
+            return _formItem(t)
+        }),
+        footer: btn ? _btn(
             Object.assign(btn, {
-                form: id,
                 fields
             })
-
-        ))
-    }
-
-    form.appendChild(formHeader)
-    form.appendChild(formBody)
-    form.appendChild(formFooter)
-    el.appendChild(form)
+        ) : ""
+    })
+    // el = el ? document.querySelector(el) : document.body
+    // el.appendChild(form)
+    _appendTo(el, form)
     return form
 }
+
+function _panel(options) {
+    let {
+        title,
+        body,
+        footer
+    } = options
+
+    let id = _random()
+    let panel = _div({
+        class: 'panel',
+        id
+    })
+
+    let panelHeader = _div({
+        class: "panel_header",
+        text: title
+    })
+
+    let panelBody = _div({
+        class: 'panel_body'
+    })
+
+    let panelFooter = _div({
+        class: "panel_footer"
+    });
+
+    if (Array.isArray(body)) {
+        body.forEach(t => {
+            // t.form=id
+            t.setAttribute("form", id)
+            panelBody.appendChild(t)
+        })
+
+    } else {
+        body.setAttribute("form", id)
+        panelBody.appendChild(body)
+    }
+
+    if (footer) {
+        footer.setAttribute("form", id)
+        panelFooter.appendChild(footer)
+    }
+
+
+    panel.appendChild(panelHeader)
+    panel.appendChild(panelBody)
+    panel.appendChild(panelFooter)
+    return panel
+
+
+}
+
+function _appendTo(el, form) {
+    el = el ? document.querySelector(el) : document.body
+    el.appendChild(form)
+}
+
+//上溯
+function _closest(el, cls) {
+    if (!el.parentNode) { //document  ie8不支持parentNode
+        return null
+    } else if (cls.charAt(0) === "." && el.className.split(" ").indexOf(cls.substring(1)) >= 0) {
+        return el;
+    } else if (cls.charAt(0) === "#" && el.id.toLowerCase() === cls.substring(1).toLowerCase()) {
+        return el;
+    } else if (el.tagName.toLowerCase() === cls.toLowerCase()) {
+        return el
+    } else {
+        return _closest(el.parentNode, cls)
+    }
+}
+
+
 
 function _btn({
     click,
@@ -106,7 +195,9 @@ function _btn({
     btn.name = name
 
     btn.onclick = (e) => {
-        let form = e.target.getAttribute("form")
+        // let form = e.target.getAttribute("form")
+
+        let form = _closest(e.target, ".panel").id
 
         console.log(fields)
         let bizModel = {}
@@ -136,9 +227,8 @@ function _btn({
                 click(bizModel)
 
                 _query("#" + form).appendChild(_div({
-                        text: JSON.stringify(bizModel)
-                    }
-                ))
+                    text: JSON.stringify(bizModel)
+                }))
 
 
 
@@ -351,6 +441,42 @@ function _wrapper(options) {
         // events,
         title
     })
+}
+
+function _list(options) {
+    let {
+        el,
+        fields
+    } = options
+    let table = document.createElement("table")
+    let tr = document.createElement("tr")
+
+    table.appendChild(tr)
+    //header
+    fields.forEach(t => {
+        let th = document.createElement("th")
+        th.innerText = t.label
+        tr.appendChild(th)
+    })
+
+    //mock 
+    for(let i=0;i<10;i++){
+        let tr = document.createElement("tr")
+        fields.forEach(t => {
+            let td = document.createElement("td")
+            td.innerText = _random()
+            tr.appendChild(td)
+        })
+        table.appendChild(tr)
+    }
+
+   let list= _panel({
+        title:"List",
+        body:table
+    })
+
+    _appendTo(el, list)
+    return list
 }
 
 // export {
